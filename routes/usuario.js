@@ -12,12 +12,21 @@ const usuario = models.Usuario
 
 //rota com função de adicionar usuario
 router.get('/adicionar', async (req, res)=>{
-    let adicionar = await usuario.create({
+    await usuario.create({
         nome: 'padrão',
         email: 'pad@gmail',
         senha: '12345'
     })
     res.send('Usuário adicionado!')
+})
+
+router.get('/listar', async (req, res)=>{
+
+    let id = req.body.id
+    
+    await usuario.findByPk(id).then((response)=>{
+        res.send(response)
+    })
 })
 
 module.exports = router

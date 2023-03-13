@@ -1,8 +1,13 @@
 //importando express
 const express = require("express")
-const { JSON } = require("sequelize")
 
-//importando router
+//tonando express executável
+const app = express()
+
+//configurando express para trabalhar com json
+app.use(express.json());
+
+//importando router para utilização de rotas em arquivos separados
 const router = express.Router()
 
 //importando models
@@ -17,12 +22,12 @@ router.post('/adicionar', async (req, res)=>{
         usuarioId: req.body.usuarioId,
         valor: req.body.valor
     })
-    res.send(JSON.stringfy('success'))
+    res.send(JSON.stringify('success'))
 })
 
 //rota com função de listar orçamentos
 router.get('/listar', async (req, res)=>{
-    await orcamento.findByPk(id).then((response)=>{
+    await orcamento.findByPk(1).then((response)=>{
         res.send(response)
     })
 })
@@ -48,7 +53,8 @@ router.post('/editar', async (req, res)=>{
         {valor},
         {where:{id}}
     ).then(()=>{
-        res.send(JSON.stringfy('success'))
+        res.send(JSON.stringify('success'))
+        // res.send('alterado')
     })
 })
 
