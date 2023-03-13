@@ -13,39 +13,48 @@ const router = express.Router()
 //importando models
 const models = require('../models')
 
-//armazenando model de orçamento em uma constante
+//armazenando models em constantes
+const usuario = models.Usuario
 const orcamento = models.Orcamento
 
 //rota com função de adicionar orçamento
 router.post('/adicionar', async (req, res)=>{
     await orcamento.create({
-        usuarioId: req.body.usuarioId,
+
+        // usuarioId: 1,
+        usuarioId: req.body.id,
         valor: req.body.valor
     })
     res.send(JSON.stringify('success'))
 })
 
-//rota com função de listar orçamentos
+//rota com função de listar orçamento, que está relaionado ao usuario
 router.get('/listar', async (req, res)=>{
-    await orcamento.findByPk(1).then((response)=>{
-        res.send(response)
+
+    // let id = 1
+    let id = req.body.id
+
+    await usuario.findByPk(id, {include:[{all: true}]}).then((response)=>{
+        res.send(response.Orcamento)
     })
 })
 
 //rota com função de listar orçamento a ser editado
-router.get('/editar/:id', async (req, res)=>{
+router.get('/editar', async (req, res)=>{
+    
+    // let id = 1
+    let id = req.body.id
 
-    let id = req.params.id
-
-    await orcamento.findByPk(id).then((response)=>{
-            res.send(response)
-        })
+    await usuario.findByPk(id, {include:[{all: true}]}).then((response)=>{
+        res.send(response.Orcamento)
+    })
     
 })
 
 //rota com função de editar orçamento
 router.post('/editar', async (req, res)=>{
 
+    // let id = 1
     let id = req.body.id
     let valor = req.body.valor
 
