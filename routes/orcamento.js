@@ -32,35 +32,53 @@ router.post('/adicionar', async (req, res) => {
         res.send({ erros: erros })
     } else {
 
-        await orcamento.create({
+        //verificando se o usuário ja possui orçamento
+        let id = req.body.id
 
-            // usuarioId: 1,
-            usuarioId: req.body.id,
-            valor: req.body.valor
+        await usuario.findByPk(id, { include: [{ all: true }] }).then((response) => {
+
+            if (response.Orcamento) {
+                res.send(JSON.stringify('Usuário ja possui orçamento'))
+            } else {
+                orcamento.create({
+
+                    usuarioId: req.body.id,
+                    valor: req.body.valor
+                })
+
+                res.send(JSON.stringify('success'))
+            }
+        }).catch((error) => {
+            res.send(JSON.stringify('error'))
+            console.log(error)
         })
-        res.send(JSON.stringify('success'))
+
     }
 })
 
-//rota com função de listar orçamento, que está relaionado ao usuario
+//rota com função de listar orçamento, que está relaionado ao usuario, 
 router.get('/listar', async (req, res) => {
 
-    // let id = 1
     let id = req.body.id
 
     await usuario.findByPk(id, { include: [{ all: true }] }).then((response) => {
         res.send(response.Orcamento)
+    }).catch((error) => {                        //<= tratamento de erro para evitar que a aplicação caia
+        res.send(JSON.stringify('error'))
+        console.log(error)
     })
 })
 
 //rota com função de listar orçamento a ser editado
 router.get('/editar', async (req, res) => {
 
-    // let id = 1
     let id = req.body.id
 
     await usuario.findByPk(id, { include: [{ all: true }] }).then((response) => {
         res.send(response.Orcamento)
+    }).catch((error) => {
+        res.send(JSON.stringify('error'))
+        console.log(error)
     })
 
 })
@@ -80,7 +98,6 @@ router.post('/editar', async (req, res) => {
         res.send({ erros: erros })
     } else {
 
-        // let id = 1
         let id = req.body.id
         let valor = req.body.valor
 
@@ -90,13 +107,17 @@ router.post('/editar', async (req, res) => {
         ).then(() => {
             res.send(JSON.stringify('success'))
             // res.send('alterado')
+        }).catch((error) => {
+            res.send(JSON.stringify('error'))
+            console.log(error)
         })
     }
 })
 
-// //rota com função de deletar orçamento
-// router.get('/deletar', async (req, res)=>{
-
+//rota com função de deletar orçamento
+// router.get('/deletar/:id', async (req, res) => {
+//     orcamento.destroy({ where: { id: req.params.id } })
+//     res.send('renda deletada')
 // })
 
 module.exports = router
