@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       GastoAgendado.belongsTo(models.Categoria)
     }
   }
-  gastoAgendado.init({
+  GastoAgendado.init({
     valor: DataTypes.DECIMAL,
     dataGasto: DataTypes.DATE,
     categoriaId: DataTypes.INTEGER
