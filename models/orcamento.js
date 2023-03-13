@@ -16,8 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Orcamento.init({
     valor: DataTypes.DECIMAL,
-    usuarioId: DataTypes.INTEGER,
-    categoriaId: DataTypes.INTEGER
+    usuarioId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Orcamento',
