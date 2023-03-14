@@ -115,9 +115,9 @@ router.post('/editar', async (req, res) => {
 })
 
 //rota com função de deletar orçamento
-// router.get('/deletar/:id', async (req, res) => {
-//     orcamento.destroy({ where: { id: req.params.id } })
-//     res.send('renda deletada')
-// })
+router.get('/deletar/:id', async (req, res) => {
+    orcamento.destroy({ where: { id: req.params.id } })
+    res.send('renda deletada')
+})
 
 module.exports = router

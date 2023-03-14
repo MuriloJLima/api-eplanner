@@ -20,6 +20,18 @@ router.get('/adicionar', async (req, res)=>{
     res.send('Usuário adicionado!')
 })
 
+router.post('/login', async (req, res)=>{
+    await usuario.findOne({
+        where: {email: req.body.email, senha: req.body.senha}
+    }).then((response)=>{
+        if(response === null){
+            res.send(JSON.stringify('error'))
+        }else{
+            res.send(response)
+        }
+    })
+})
+
 router.get('/listar', async (req, res)=>{
 
     let id = req.body.id
