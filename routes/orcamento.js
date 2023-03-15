@@ -106,7 +106,6 @@ router.post('/editar', async (req, res) => {
             { where: { id } }
         ).then(() => {
             res.send(JSON.stringify('success'))
-            // res.send('alterado')
         }).catch((error) => {
             res.send(JSON.stringify('error'))
             console.log(error)
@@ -115,9 +114,9 @@ router.post('/editar', async (req, res) => {
 })
 
 //rota com função de deletar orçamento
-router.get('/deletar/:id', async (req, res) => {
-    orcamento.destroy({ where: { id: req.params.id } })
-    res.send('renda deletada')
-})
+// router.get('/deletar/:id', async (req, res) => {
+//     orcamento.destroy({ where: { id: req.params.id } })
+//     res.send('renda deletada')
+// })
 
 module.exports = router

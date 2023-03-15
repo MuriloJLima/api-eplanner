@@ -20,6 +20,7 @@ router.get('/adicionar', async (req, res)=>{
     res.send('Usuário adicionado!')
 })
 
+//rota com função de validar usuário
 router.post('/login', async (req, res)=>{
     await usuario.findOne({
         where: {email: req.body.email, senha: req.body.senha}
@@ -29,15 +30,22 @@ router.post('/login', async (req, res)=>{
         }else{
             res.send(response)
         }
+    }).catch((error) => {
+        res.send(JSON.stringify('error'))  //<= tratamento de erro para evitar que a aplicação caia
+        console.log(error)
     })
 })
 
+//rota com função de listar usuário
 router.get('/listar', async (req, res)=>{
 
     let id = req.body.id
     
     await usuario.findByPk(id).then((response)=>{
         res.send(response)
+    }).catch((error) => {
+        res.send(JSON.stringify('error'))
+        console.log(error)
     })
 })
 
