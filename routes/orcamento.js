@@ -89,7 +89,7 @@ router.post('/editar', async (req, res) => {
     //validação dos orçamentos
     let erros = []
 
-    if (req.body.valor < 500 || req.body.valor > 12000 || typeof req.body.valor == undefined ||
+    if (req.body.valor < 500 || req.body.valor > 12500 || typeof req.body.valor == undefined ||
         req.body.valor == null || !req.body.valor) {
         erros.push({ texto: "Valor inválido" })
     }

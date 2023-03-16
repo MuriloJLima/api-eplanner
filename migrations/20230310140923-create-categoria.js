@@ -16,6 +16,9 @@ module.exports = {
       descricao:{
         type: Sequelize.STRING
       },
+      valor: {
+        type: Sequelize.DECIMAL
+      },
       orcamentoId: {
         type: Sequelize.INTEGER,
         references: {
@@ -37,6 +40,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Categoria');
+    await queryInterface.dropTable('Categorias');
   }
 };
