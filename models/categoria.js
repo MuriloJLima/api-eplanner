@@ -11,8 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Categoria.belongsTo(models.Orcamento)
-      Categoria.hasMany(models.GastoAgendado)
       Categoria.hasMany(models.GastoRealizado)
+      Categoria.hasMany(models.GastoAgendado)
     }
   }
   Categoria.init({

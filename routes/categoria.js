@@ -28,7 +28,11 @@ router.post('/adicionar', async (req, res) => {
 })
 
 router.get('/listar', async (req, res) => {
+    await categoria.findAll().then((response)=>{
+        res.send(response)
+    })
 
+    
 })
 
 router.post('/editar', async (req, res) => {
