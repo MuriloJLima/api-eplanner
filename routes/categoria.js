@@ -25,7 +25,7 @@ router.get('/disponivelCat', async (req, res) => {
         let response = await orcamento.findByPk(id)
 
         let soma = await categoria.sum('valor', { where: { orcamentoId: id } })
-        let rendaDisponivel =  response.valor - soma
+        let rendaDisponivel = response.valor - soma
 
         res.send(JSON.stringify(rendaDisponivel))
     } catch {
@@ -83,10 +83,12 @@ router.post('/adicionar', async (req, res) => {
 })
 
 router.get('/listar', async (req, res) => {
-    await categoria.findAll().then((response) => {
+
+    let id = req.body.id
+
+    await categoria.findAll({ where: { orcamentoId: id } }).then((response) => {
         res.send(response)
     })
-
 
 })
 
@@ -94,8 +96,9 @@ router.post('/editar', async (req, res) => {
 
 })
 
-router.post('/deletar', async (req, res) => {
-
+router.post('/deletar/:id', async (req, res) => {
+    await categoria.destroy({ where: { id: req.params.id } })
+    res.send('caregoria deletada')
 })
 
 module.exports = router

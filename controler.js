@@ -7,6 +7,7 @@ const cors = require('cors');
 const routerUsuario = require('./routes/usuario')
 const routerOrcamento = require('./routes/orcamento')
 const routerCategoria = require('./routes/categoria')
+const routerGastoRealizado = require('./routes/gastoRealizado')
 
 //config
 const app = express();
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use('/usuario', routerUsuario)
 app.use('/orcamento', routerOrcamento)
 app.use('/categoria', routerCategoria)
+app.use('/gastoRealizado', routerGastoRealizado)
 
 //porta
 let porta = process.env.PORT || 3000;
