@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   GastoAgendado.init({
+    descricao: DataTypes.STRING,
     valor: DataTypes.DECIMAL,
     dataGasto: DataTypes.DATE,
     categoriaId: DataTypes.INTEGER

@@ -14,8 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   GastoRealizado.init({
+    descricao: DataTypes.STRING,
     valor: DataTypes.DECIMAL,
-    dataGasto: DataTypes.DATE,
     categoriaId: DataTypes.INTEGER
   }, {
     sequelize,

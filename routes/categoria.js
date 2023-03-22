@@ -82,6 +82,7 @@ router.post('/adicionar', async (req, res) => {
     }
 })
 
+//rota com função de listar todas as categorias pertencentes a um usuário
 router.get('/listar', async (req, res) => {
 
     let id = req.body.id
@@ -96,6 +97,7 @@ router.post('/editar', async (req, res) => {
 
 })
 
+//rota cm função de excluir categoria
 router.post('/deletar/:id', async (req, res) => {
     await categoria.destroy({ where: { id: req.params.id } })
     res.send('caregoria deletada')

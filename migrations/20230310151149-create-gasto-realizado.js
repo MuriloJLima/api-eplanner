@@ -16,9 +16,6 @@ module.exports = {
       valor: {
         type: Sequelize.DECIMAL
       },
-      dataGasto: {
-        type: Sequelize.DATE
-      },
       categoriaId: {
         type: Sequelize.INTEGER,
         references: {

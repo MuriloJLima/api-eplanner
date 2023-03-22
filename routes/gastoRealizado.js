@@ -1,4 +1,4 @@
-const express = require("express")
+const express = require("express");
 
 //tonando express executável
 const app = express()
@@ -16,6 +16,7 @@ const models = require('../models')
 const categoria = models.Categoria
 const gastoRealizado = models.GastoRealizado
 
+//rota com função de listar categorias para seleção no formulário de gasto
 router.get('/adicionar/add', async (req, res) => {
     let id = req.body.id
 
@@ -24,12 +25,37 @@ router.get('/adicionar/add', async (req, res) => {
     })
 })
 
+//rota com função de adicionar gasto
 router.post('/adicionar', async (req, res) => {
-    await gastoRealizado.create({
-        descricao: req.body.descricao,
-        valor: req.body.valor,
-        categoriaId: req.body.categoria
-    })
+
+    //validações
+    let erros = []
+
+    if (req.body.categoria.valor < req.body.valor || !req.body.valor || req.body.valor == null) {
+        erros.push({ texto: "Valor inválido" })
+    }
+
+    if (erros.length > 0) {
+        res.send({ erros: erros })
+    } else {
+        //inserindo gasto e atualizando tabela de categoria
+        await gastoRealizado.create({
+            descricao: req.body.descricao,
+            valor: req.body.valor,
+            categoriaId: req.body.categoria.id
+        }).then((gasto) => {
+
+            let valor = req.body.categoria.valor - gasto.valor
+            let id = req.body.categoria.id
+
+            categoria.update(
+                { valor },
+                { where: { id } }
+            )
+        })
+        res.send(JSON.stringify("success"))
+    }
+
 })
 
 router.get('/listar', async (req, res) => {
