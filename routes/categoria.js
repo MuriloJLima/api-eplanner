@@ -34,7 +34,7 @@ router.get('/disponivelCat', async (req, res) => {
 })
 
 
-//rota com função de adicionar orçamento
+//rota com função de adicionar categoria
 router.post('/adicionar', async (req, res) => {
 
     try {
@@ -92,7 +92,17 @@ router.get('/listar', async (req, res) => {
     })
 
 })
+//rota com função de buscar uma categoria pelo id
+router.get('/editar/:id', async (req, res) => {
+    try {
+        let categoriaEncontrada = await categoria.findByPk(req.params.id)
+        res.send(categoriaEncontrada)
+    } catch {
+        res.send(JSON.stringify('error'))
+    }
+})
 
+// rota com função de editar a categoria
 router.post('/editar', async (req, res) => {
     const id = req.body.id;
     const nome = req.body.nome;
@@ -109,7 +119,7 @@ router.post('/editar', async (req, res) => {
     });
 });
 
-//rota cm função de excluir categoria
+//rota com função de excluir categoria
 router.post('/deletar/:id', async (req, res) => {
     await categoria.destroy({ where: { id: req.params.id } })
     res.send('categoria deletada')
