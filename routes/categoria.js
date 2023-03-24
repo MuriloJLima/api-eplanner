@@ -94,13 +94,25 @@ router.get('/listar', async (req, res) => {
 })
 
 router.post('/editar', async (req, res) => {
-
-})
+    const id = req.body.id;
+    const nome = req.body.nome;
+    const descricao = req.body.descricao;
+    const valor = req.body.valor;
+    await categoria.update(
+        { nome, descricao, valor },
+        { where: { id } }
+    ).then(() => {
+        res.send("success");
+    }).catch((error) => {
+        console.error(error);
+        res.status(500).send("error");
+    });
+});
 
 //rota cm função de excluir categoria
 router.post('/deletar/:id', async (req, res) => {
     await categoria.destroy({ where: { id: req.params.id } })
-    res.send('caregoria deletada')
+    res.send('categoria deletada')
 })
 
 module.exports = router

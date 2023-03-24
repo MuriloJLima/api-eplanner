@@ -52,8 +52,12 @@ router.post('/adicionar', async (req, res) => {
                 { valor },
                 { where: { id } }
             )
+            res.send(JSON.stringify("success"))
+        }).catch((error) => {
+            res.send(JSON.stringify('error'))
+            console.log(error)
         })
-        res.send(JSON.stringify("success"))
+        
     }
 
 })
