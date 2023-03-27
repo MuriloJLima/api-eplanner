@@ -5,10 +5,7 @@ const express = require("express")
 const router = express.Router()
 
 //importando models
-const models = require('../models')
-
-//armazenando model de orçamento em uma constante
-const usuario = models.Usuario
+const usuario = require('../models/usuarios')
 
 //rota com função de adicionar usuario
 router.get('/adicionar', async (req, res)=>{

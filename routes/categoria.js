@@ -11,57 +11,38 @@ app.use(express.json());
 const router = express.Router()
 
 //importando models
-const models = require('../models')
-
-//armazenando models em constantes
-const categoria = models.Categoria
-const orcamento = models.Orcamento
+const categoria = require('../models/categorias')
+const orcamento = require('../models/orcamentos')
 
 //rota com função de listar renda disponível para criação de categoria
 router.get('/disponivelCat', async (req, res) => {
     try {
-        let id = req.body.id
+        let usuarioId = req.body.usuarioId
 
-        let response = await orcamento.findByPk(id)
+        let renda = await orcamento.findOne({ where: { usuarioId } })
 
-        let soma = await categoria.sum('valor', { where: { orcamentoId: id } })
-        let rendaDisponivel = response.valor - soma
+        let somaCats = await categoria.sum('valor', { where: { orcamentoId: renda.id } })
+        let response = renda.valor - somaCats
 
-        res.send(JSON.stringify(rendaDisponivel))
+        res.send(JSON.stringify(response))
     } catch {
         res.send(JSON.stringify('error'))
     }
 })
 
 
-//rota com função de adicionar orçamento
+//rota com função de adicionar categoria
 router.post('/adicionar', async (req, res) => {
 
     try {
-        //capturar o orçamento pelo id
-        let id = req.body.id
 
-        //listar o orçamento para capturar valor
-        let response = await orcamento.findByPk(id,
-            {
-                // include: [{
-                //     all: true
-                //     // model: categoria,
-                //     // required: true
-                // }]
-            }
-        )
-
-        //capturando a soma dos valores das categorias
-        let soma = await categoria.sum('valor', { where: { orcamentoId: id } })
-
-        //subtraindo o valor do orçamento com os valores das categorias para verificar a renda disponível
-        let rendaDisponivel = response.valor - soma
+        //armazena o valor disponível para a criação de categorias
+        let rendaDisponivel = req.body.rendaDisponivel
 
         // verificar se o valor da categoria ultrapassa o orçamento e a renda disponível
         let erros = []
 
-        if (rendaDisponivel < req.body.valor || response.valor < req.body.valor || !req.body.valor || req.body.valor == null) {
+        if (rendaDisponivel < req.body.valor || !req.body.valor || req.body.valor == null) {
             erros.push({ texto: "Valor inválido" })
         }
 
@@ -70,10 +51,11 @@ router.post('/adicionar', async (req, res) => {
         } else {
             //caso não ultrapasse, criar categoria
             await categoria.create({
-                orcamentoId: req.body.id,
+                orcamentoId: req.body.usuarioId,
                 nome: req.body.nome,
                 descricao: req.body.descricao,
-                valor: req.body.valor,
+                valorCompleto: req.body.valor,
+                valorDisponivel: req.body.valor
             })
             res.send(JSON.stringify("success"))
         }
@@ -93,14 +75,73 @@ router.get('/listar', async (req, res) => {
 
 })
 
-router.post('/editar', async (req, res) => {
-
+//rota com função de listar dados da categoria no form de edição
+router.get('/editar/:id', async (req, res) => {
+    try {
+        let response = await categoria.findByPk(req.params.id)
+        res.send(response)
+    } catch {
+        res.send(JSON.stringify('error'))
+    }
 })
 
-//rota cm função de excluir categoria
+// rota com função de editar a categoria
+router.post('/editar', async (req, res) => {
+
+    //armazena o valor disponível 
+    let rendaDisponivel = req.body.rendaDisponivel
+
+    //armazena o valor atual da categoria
+    let cat = await categoria.findByPk(req.body.categoriaId)
+
+    //em caso de aumento de valor, verificar se a diferença é maior que o valor disponível
+    let erros = []
+
+    if (rendaDisponivel < req.body.valor - cat.valorCompleto || !req.body.valor || req.body.valor == null) {
+        erros.push({ texto: "Valor inválido" })
+    }
+
+    if (erros.length > 0) {
+        res.send({ erros: erros })
+    }
+    else {
+
+        //alterar o valor disponível dependendo da condição
+        let valorDisponivel = cat.valorDisponivel
+
+        if (cat.valorCompleto > req.body.valor) {
+
+            let result = cat.valorCompleto - req.body.valor
+            valorDisponivel = Number(cat.valorDisponivel) - result
+        }
+
+        if (cat.valorCompleto < req.body.valor) {
+
+            let result = req.body.valor - cat.valorCompleto
+            valorDisponivel = Number(cat.valorDisponivel) + result
+        }
+        let id = req.body.categoriaId;
+        let nome = req.body.nome;
+        let descricao = req.body.descricao;
+        let valorCompleto = req.body.valor;
+
+        //editando categoria
+        await categoria.update(
+            { nome, descricao, valorCompleto, valorDisponivel },
+            { where: { id } }
+        ).then(() => {
+            res.send("success");
+        }).catch((error) => {
+            console.error(error);
+            res.status(500).send("error");
+        });
+    }
+});
+
+//rota com função de excluir categoria
 router.post('/deletar/:id', async (req, res) => {
     await categoria.destroy({ where: { id: req.params.id } })
-    res.send('caregoria deletada')
+    res.send('categoria deletada')
 })
 
 module.exports = router

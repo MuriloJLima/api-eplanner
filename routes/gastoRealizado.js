@@ -3,6 +3,9 @@ const express = require("express");
 //tonando express executável
 const app = express()
 
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
 //configurando express para trabalhar com json
 app.use(express.json());
 
@@ -10,15 +13,12 @@ app.use(express.json());
 const router = express.Router()
 
 //importando models
-const models = require('../models')
-
-//armazenando models em constantes
-const categoria = models.Categoria
-const gastoRealizado = models.GastoRealizado
+const categoria = require('../models/categorias')
+const gastoRealizado = require('../models/gastosRealizados')
 
 //rota com função de listar categorias para seleção no formulário de gasto
 router.get('/adicionar/add', async (req, res) => {
-    let id = req.body.id
+    let id = req.body.usuarioid
 
     await categoria.findAll({ where: { orcamentoId: id } }).then((response) => {
         res.send(response)
@@ -45,22 +45,53 @@ router.post('/adicionar', async (req, res) => {
             categoriaId: req.body.categoria.id
         }).then((gasto) => {
 
-            let valor = req.body.categoria.valor - gasto.valor
+            let valorDisponivel = req.body.categoria.valorDisponivel - gasto.valor
             let id = req.body.categoria.id
 
             categoria.update(
-                { valor },
+                { valorDisponivel },
                 { where: { id } }
             )
+            res.send(JSON.stringify("success"))
+        }).catch((error) => {
+            res.send(JSON.stringify('error'))
+            console.log(error)
         })
-        res.send(JSON.stringify("success"))
+
     }
 
 })
 
-router.get('/listar', async (req, res) => {
+//rota com função de listar gastos através no mês de registro
+router.get('/listar/:mes/:ano', async (req, res) => {
+
+    let mes = req.params.mes
+    let ano = req.params.ano
+
+    await gastoRealizado.findAll({
+        where: {
+            createdAt: {
+                [Op.gte]: new Date(ano, mes - 1, 1), // data inicial do mês
+                [Op.lt]: new Date(ano, mes, 1), // data inicial do próximo mês
+            }
+        },
+        include: [{ all: true }],
+    }).then((response) => {
+
+        if (!response || response === undefined || response == '') {
+            res.send(JSON.stringify('Nenhum gasto realizado nesse período'))
+        } else {
+            res.send(response)
+        }
+    }).catch((error) => {
+        res.send(JSON.stringify('error'))
+        console.log(error)
+    })
 
 })
+
+
+
 
 router.post('/editar', async (req, res) => {
 

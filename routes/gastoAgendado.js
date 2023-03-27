@@ -10,11 +10,8 @@ app.use(express.json());
 const router = express.Router()
 
 //importando models
-const models = require('../models')
-
-//armazenando models em constantes
-const categoria = models.Categoria
-const gastoRealizado = models.GastoRealizado
+const categoria = require('../models/categorias')
+const gastoRealizado = require('../models/gastosAgendados')
 
 router.post('/adicionar', async (req, res) => {
 
