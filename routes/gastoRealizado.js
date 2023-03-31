@@ -91,11 +91,9 @@ router.get('/listar/:mes/:ano', async (req, res) => {
 })
 
 
+// router.post('/editar', async (req, res) => {
 
-
-router.post('/editar', async (req, res) => {
-
-})
+// })
 
 router.post('/excluir', async (req, res) => {
 

@@ -8,23 +8,39 @@ const router = express.Router()
 const usuario = require('../models/usuarios')
 
 //rota com função de adicionar usuario
-router.get('/adicionar', async (req, res)=>{
-    await usuario.create({
-        nome: 'padrão',
-        email: 'pad@gmail',
-        senha: '12345'
-    })
-    res.send('Usuário adicionado!')
+router.post('/adicionar', async (req, res) => {
+
+    try {
+        let erros = []
+
+        if (!req.body.nome || req.body.nome == null) {
+            erros.push({ texto: "Todos os dados precisam ser preenchidos" })
+        }
+
+        if (erros.length > 0) {
+            res.send({ erros: erros })
+        } else {
+            let response = await usuario.create({
+                nome: req.body.nome,
+                email: req.body.email,
+                senha: req.body.senha
+            })
+            res.send(response)
+        }
+
+    } catch {
+        res.send(JSON.stringify('error'))
+    }
 })
 
 //rota com função de validar usuário
-router.post('/login', async (req, res)=>{
+router.post('/login', async (req, res) => {
     await usuario.findOne({
-        where: {email: req.body.email, senha: req.body.senha}
-    }).then((response)=>{
-        if(response === null){
+        where: { email: req.body.email, senha: req.body.senha }
+    }).then((response) => {
+        if (response === null) {
             res.send(JSON.stringify('error'))
-        }else{
+        } else {
             res.send(response)
         }
     }).catch((error) => {
@@ -34,11 +50,11 @@ router.post('/login', async (req, res)=>{
 })
 
 //rota com função de listar usuário
-router.get('/listar', async (req, res)=>{
+router.get('/listar', async (req, res) => {
 
     let id = req.body.id
-    
-    await usuario.findByPk(id).then((response)=>{
+
+    await usuario.findByPk(id).then((response) => {
         res.send(response)
     }).catch((error) => {
         res.send(JSON.stringify('error'))

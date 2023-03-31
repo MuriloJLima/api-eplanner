@@ -25,8 +25,6 @@ router.post('/adicionar', async (req, res) => {
             res.send(JSON.stringify('Usuário ja possui orçamento'))
         } else {
             orcamento.create({
-
-                // id: 1,
                 usuarioId: req.body.usuarioId,
                 valor: req.body.valor
             })
@@ -42,12 +40,12 @@ router.post('/adicionar', async (req, res) => {
 })
 
 //rota com função de listar orçamento, que está relaionado ao usuario, 
-router.get('/listar', async (req, res) => {
+router.post('/listar', async (req, res) => {
 
     let id = req.body.usuarioId
 
     await usuario.findByPk(id, { include: [{ all: true }] }).then((response) => {
-        res.send(response.orcamentos)
+        res.send(response.orcamento)
     }).catch((error) => {                        //<= tratamento de erro para evitar que a aplicação caia
         res.send(JSON.stringify('error'))
         console.log(error)
