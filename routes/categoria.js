@@ -15,16 +15,32 @@ const categoria = require('../models/categorias')
 const orcamento = require('../models/orcamentos')
 
 //rota com função de listar renda disponível para criação de categoria
-router.get('/disponivelCat', async (req, res) => {
+router.post('/disponivelCat', async (req, res) => {
     try {
         let usuarioId = req.body.usuarioId
 
-        let renda = await orcamento.findOne({ where: { usuarioId } })
 
-        let somaCats = await categoria.sum('valor', { where: { orcamentoId: renda.id } })
-        let response = renda.valor - somaCats
+        await orcamento.findOne({ where: { usuarioId } }).then((renda) => {
 
-        res.send(JSON.stringify(response))
+            categoria.findAll({ where: { orcamentoId: renda.id } }).then((categorias) => {
+                if (categorias == '' || !categorias) {
+                    let response = renda.valor
+
+                    res.send(JSON.stringify(response))
+                    console.log(response)
+                }
+                else {
+                    categoria.sum('valorCompleto', { where: { orcamentoId: renda.id } }).then((somaCats)=>{
+                         let response = renda.valor - somaCats
+
+                         console.log(response)
+                         res.send(JSON.stringify(response))
+                    })
+
+                }
+
+            })
+        })
     } catch {
         res.send(JSON.stringify('error'))
     }
@@ -42,8 +58,13 @@ router.post('/adicionar', async (req, res) => {
         // verificar se o valor da categoria ultrapassa o orçamento e a renda disponível
         let erros = []
 
-        if (rendaDisponivel < req.body.valor || !req.body.valor || req.body.valor == null) {
-            erros.push({ texto: "Valor inválido" })
+        if (rendaDisponivel < req.body.valor) {
+            erros.push("O valor da categoria deve ser menor que o valor disponível")
+        }
+
+        if (!req.body.valor || req.body.valor == null || !req.body.nome || req.body.nome == null
+            || !req.body.descricao || req.body.descricao == null) {
+            erros.push("Preencha todos os campos")
         }
 
         if (erros.length > 0) {
