@@ -43,7 +43,7 @@ router.post('/adicionar', async (req, res) => {
 router.post('/listar', async (req, res) => {
 
     let id = req.body.usuarioId
-
+    // console.log(id)
     await usuario.findByPk(id, { include: [{ all: true }] }).then((response) => {
         res.send(response.orcamento)
     }).catch((error) => {                        //<= tratamento de erro para evitar que a aplicação caia

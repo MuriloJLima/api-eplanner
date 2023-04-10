@@ -14,7 +14,7 @@ const router = express.Router()
 
 //importando models
 const categoria = require('../models/categorias')
-const gastoRealizado = require('../models/gastosRealizados')
+const gastoRealizado = require('../models/gastosRealizados');
 
 //rota com função de listar categorias para seleção no formulário de gasto
 router.get('/adicionar/add', async (req, res) => {
@@ -62,32 +62,29 @@ router.post('/adicionar', async (req, res) => {
 
 })
 
-//rota com função de listar gastos através no mês de registro
-router.get('/listar/:mes/:ano', async (req, res) => {
+//rota com função de listar gastos através no mês de registro e da categoria vincuçada ao usuário
+router.get('/listar', async (req, res) => {
 
-    let mes = req.params.mes
-    let ano = req.params.ano
+    let id = req.body.usuarioId
+
+    let mes = req.body.mes
+    let ano = req.body.ano
 
     await gastoRealizado.findAll({
+        include: {
+            model: categoria,
+            where: {orcamentoId: id}
+        },
         where: {
             createdAt: {
                 [Op.gte]: new Date(ano, mes - 1, 1), // data inicial do mês
                 [Op.lt]: new Date(ano, mes, 1), // data inicial do próximo mês
             }
-        },
-        include: [{ all: true }],
+        }
     }).then((response) => {
 
-        if (!response || response === undefined || response == '') {
-            res.send(JSON.stringify('Nenhum gasto realizado nesse período'))
-        } else {
-            res.send(response)
-        }
-    }).catch((error) => {
-        res.send(JSON.stringify('error'))
-        console.log(error)
+        res.send(response)
     })
-
 })
 
 

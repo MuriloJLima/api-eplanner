@@ -76,7 +76,7 @@ router.post('/adicionar', async (req, res) => {
                 nome: req.body.nome,
                 descricao: req.body.descricao,
                 valorCompleto: req.body.valor,
-                valorDisponivel: req.body.valor
+                valorDisponivel: req.body.valor,
             })
             res.send(JSON.stringify("success"))
         }
@@ -86,11 +86,13 @@ router.post('/adicionar', async (req, res) => {
 })
 
 //rota com função de listar todas as categorias pertencentes a um usuário
-router.get('/listar', async (req, res) => {
+router.post('/listar', async (req, res) => {
 
-    let id = req.body.id
+    let id = req.body.usuarioId
 
+    // console.log(id)
     await categoria.findAll({ where: { orcamentoId: id } }).then((response) => {
+        console.log(response)
         res.send(response)
     })
 
