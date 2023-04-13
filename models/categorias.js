@@ -19,10 +19,7 @@ const categorias = connection.define(
     descricao: {
       type: Sequelize.STRING
     },
-    valorCompleto: {
-      type: Sequelize.DECIMAL
-    },
-    valorDisponivel: {
+    valor: {
       type: Sequelize.DECIMAL
     },
     createdAt: {

@@ -4,6 +4,9 @@ const express = require("express")
 //tonando express executável
 const app = express()
 
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
 //configurando express para trabalhar com json
 app.use(express.json());
 
@@ -13,6 +16,8 @@ const router = express.Router()
 //importando models
 const usuario = require('../models/usuarios')
 const orcamento = require('../models/orcamentos')
+const gastoRealizado = require('../models/gastosRealizados')
+const categoria = require('../models/categorias')
 
 //rota com função de adicionar orçamento
 router.post('/adicionar', async (req, res) => {
@@ -36,16 +41,41 @@ router.post('/adicionar', async (req, res) => {
         console.log(error)
     })
 
-    
+
 })
 
-//rota com função de listar orçamento, que está relaionado ao usuario, 
+//rota com função de listar orçamento, juntamente com a soma dos valores dos gastos do mês
 router.post('/listar', async (req, res) => {
 
     let id = req.body.usuarioId
-    // console.log(id)
-    await usuario.findByPk(id, { include: [{ all: true }] }).then((response) => {
-        res.send(response.orcamento)
+
+    await usuario.findByPk(id, { include: [{ all: true }] }).then((usuario) => {
+
+        let orcamento = usuario.orcamento
+
+        // res.send(orcamento)
+
+        let mes = req.body.mes
+        let ano = req.body.ano
+
+        console.log(mes, ano)
+
+        gastoRealizado.sum('gastosrealizados.valor', {
+            include: {
+                model: categoria,
+                where: { orcamentoId: id }
+            },
+            where: {
+                createdAt: {
+                    [Op.gte]: new Date(ano, mes - 1, 1), // data inicial do mês
+                    [Op.lt]: new Date(ano, mes, 1), // data inicial do próximo mês
+                }
+            }
+        }).then((gastos) => {
+            let response = {orcamento, gastos}
+            res.send(JSON.stringify(response))
+            console.log(JSON.stringify(response))
+        })
     }).catch((error) => {                        //<= tratamento de erro para evitar que a aplicação caia
         res.send(JSON.stringify('error'))
         console.log(error)

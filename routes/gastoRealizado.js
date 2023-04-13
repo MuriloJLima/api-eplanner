@@ -43,26 +43,14 @@ router.post('/adicionar', async (req, res) => {
             descricao: req.body.descricao,
             valor: req.body.valor,
             categoriaId: req.body.categoria.id
-        }).then((gasto) => {
-
-            let valorDisponivel = req.body.categoria.valorDisponivel - gasto.valor
-            let id = req.body.categoria.id
-
-            categoria.update(
-                { valorDisponivel },
-                { where: { id } }
-            )
-            res.send(JSON.stringify("success"))
-        }).catch((error) => {
-            res.send(JSON.stringify('error'))
-            console.log(error)
         })
+        res.send(JSON.stringify("success"))
 
     }
 
 })
 
-//rota com função de listar gastos através no mês de registro e da categoria vincuçada ao usuário
+//rota com função de listar gastos através no mês de registro e da categoria vinculada ao usuário
 router.get('/listar', async (req, res) => {
 
     let id = req.body.usuarioId
@@ -73,7 +61,7 @@ router.get('/listar', async (req, res) => {
     await gastoRealizado.findAll({
         include: {
             model: categoria,
-            where: {orcamentoId: id}
+            where: { orcamentoId: id }
         },
         where: {
             createdAt: {

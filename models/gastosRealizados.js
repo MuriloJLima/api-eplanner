@@ -42,6 +42,6 @@ gastosRealizados.belongsTo(categorias, {
   onDelete:'cascade'
 })
 
-//gastosRealizados.sync({force: true})
+//gastosRealizados.sync()
 
 module.exports = gastosRealizados

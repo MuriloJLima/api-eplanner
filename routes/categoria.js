@@ -30,11 +30,11 @@ router.post('/disponivelCat', async (req, res) => {
                     console.log(response)
                 }
                 else {
-                    categoria.sum('valorCompleto', { where: { orcamentoId: renda.id } }).then((somaCats)=>{
-                         let response = renda.valor - somaCats
+                    categoria.sum('valor', { where: { orcamentoId: renda.id } }).then((somaCats) => {
+                        let response = renda.valor - somaCats
 
-                         console.log(response)
-                         res.send(JSON.stringify(response))
+                        console.log(response)
+                        res.send(JSON.stringify(response))
                     })
 
                 }
@@ -75,8 +75,7 @@ router.post('/adicionar', async (req, res) => {
                 orcamentoId: req.body.usuarioId,
                 nome: req.body.nome,
                 descricao: req.body.descricao,
-                valorCompleto: req.body.valor,
-                valorDisponivel: req.body.valor,
+                valor: req.body.valor,
             })
             res.send(JSON.stringify("success"))
         }
@@ -111,54 +110,22 @@ router.get('/editar/:id', async (req, res) => {
 // rota com função de editar a categoria
 router.post('/editar', async (req, res) => {
 
-    //armazena o valor disponível 
-    let rendaDisponivel = req.body.rendaDisponivel
+    let id = req.body.categoriaId;
+    let nome = req.body.nome;
+    let descricao = req.body.descricao;
+    let valor = req.body.valor;
 
-    //armazena o valor atual da categoria
-    let cat = await categoria.findByPk(req.body.categoriaId)
+    //editando categoria
+    await categoria.update(
+        { nome, descricao, valor },
+        { where: { id } }
+    ).then(() => {
+        res.send("success");
+    }).catch((error) => {
+        console.error(error);
+        res.status(500).send("error");
+    });
 
-    //em caso de aumento de valor, verificar se a diferença é maior que o valor disponível
-    let erros = []
-
-    if (rendaDisponivel < req.body.valor - cat.valorCompleto || !req.body.valor || req.body.valor == null) {
-        erros.push({ texto: "Valor inválido" })
-    }
-
-    if (erros.length > 0) {
-        res.send({ erros: erros })
-    }
-    else {
-
-        //alterar o valor disponível dependendo da condição
-        let valorDisponivel = cat.valorDisponivel
-
-        if (cat.valorCompleto > req.body.valor) {
-
-            let result = cat.valorCompleto - req.body.valor
-            valorDisponivel = Number(cat.valorDisponivel) - result
-        }
-
-        if (cat.valorCompleto < req.body.valor) {
-
-            let result = req.body.valor - cat.valorCompleto
-            valorDisponivel = Number(cat.valorDisponivel) + result
-        }
-        let id = req.body.categoriaId;
-        let nome = req.body.nome;
-        let descricao = req.body.descricao;
-        let valorCompleto = req.body.valor;
-
-        //editando categoria
-        await categoria.update(
-            { nome, descricao, valorCompleto, valorDisponivel },
-            { where: { id } }
-        ).then(() => {
-            res.send("success");
-        }).catch((error) => {
-            console.error(error);
-            res.status(500).send("error");
-        });
-    }
 });
 
 //rota com função de excluir categoria
