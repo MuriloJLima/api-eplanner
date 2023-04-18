@@ -40,6 +40,8 @@ categorias.hasMany(gastosAgendados, {
   onDelete:'cascade'
 })
 
+gastosAgendados.belongsTo(categorias, { foreignKey: 'categoriaId' });
+
 
 //gastosAgendados.sync()
 

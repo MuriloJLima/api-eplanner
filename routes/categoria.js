@@ -7,12 +7,16 @@ const app = express()
 //configurando express para trabalhar com json
 app.use(express.json());
 
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
 //importando router para utilização de rotas em arquivos separados
 const router = express.Router()
 
 //importando models
 const categoria = require('../models/categorias')
 const orcamento = require('../models/orcamentos')
+const gastoRealizado = require('../models/gastosRealizados');
 
 //rota com função de listar renda disponível para criação de categoria
 router.post('/disponivelCat', async (req, res) => {
@@ -84,18 +88,48 @@ router.post('/adicionar', async (req, res) => {
     }
 })
 
-//rota com função de listar todas as categorias pertencentes a um usuário
+//rota com função de listar todas as categorias pertencentes a um usuário, 
+//juntamente com o total de gastos naquele mês
 router.post('/listar', async (req, res) => {
 
-    let id = req.body.usuarioId
+    const usuarioId = req.body.usuarioId;
 
-    // console.log(id)
-    await categoria.findAll({ where: { orcamentoId: id } }).then((response) => {
-        console.log(response)
-        res.send(response)
+    const mes = req.body.mes;
+    const ano = req.body.ano;
+
+    await categoria.findAll({
+        where: { orcamentoId: usuarioId },
+        include: [{
+            model: gastoRealizado,
+            attributes: [],
+            where: {
+                createdAt: {
+                    [Op.gte]: new Date(ano, mes - 1, 1),
+                    [Op.lt]: new Date(ano, mes, 1),
+                }
+            },
+            required: false // permite incluir categorias sem gastos
+        }],
+        attributes: [
+            'id',
+            'nome',
+            'valor',
+            'descricao',
+            'orcamentoId',
+            [Sequelize.literal(`(
+            SELECT SUM(valor)
+            FROM gastosrealizados
+            WHERE categoriaId = categorias.id
+              AND MONTH(createdAt) = ${mes}
+              AND YEAR(createdAt) = ${ano}
+          )`), 'valorTotalGastos']
+        ]
+    }).then((response) => {
+        console.log(response);
+        res.send(response);
     })
-
 })
+
 
 //rota com função de listar dados da categoria no form de edição
 router.get('/editar/:id', async (req, res) => {

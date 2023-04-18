@@ -17,37 +17,93 @@ const categoria = require('../models/categorias')
 const gastoRealizado = require('../models/gastosRealizados');
 
 //rota com função de listar categorias para seleção no formulário de gasto
-router.get('/adicionar/add', async (req, res) => {
-    let id = req.body.usuarioid
+router.post('/listar/categotias', async (req, res) => {
 
+    let id = req.body.usuarioId
+
+    // console.log(id)
     await categoria.findAll({ where: { orcamentoId: id } }).then((response) => {
+        console.log(response)
         res.send(response)
     })
+
 })
 
 //rota com função de adicionar gasto
 router.post('/adicionar', async (req, res) => {
 
-    //validações
-    let erros = []
+    let categoriaId = req.body.categoriaId
 
-    if (req.body.categoria.valor < req.body.valor || !req.body.valor || req.body.valor == null) {
-        erros.push({ texto: "Valor inválido" })
-    }
+    let mes = req.body.mes
+    let ano = req.body.ano
 
-    if (erros.length > 0) {
-        res.send({ erros: erros })
-    } else {
-        //inserindo gasto e atualizando tabela de categoria
-        await gastoRealizado.create({
-            descricao: req.body.descricao,
-            valor: req.body.valor,
-            categoriaId: req.body.categoria.id
+    await gastoRealizado.sum('gastosrealizados.valor', {
+        include: {
+            model: categoria,
+            where: { id: categoriaId }
+        },
+        where: {
+            createdAt: {
+                [Op.gte]: new Date(ano, mes - 1, 1), // data inicial do mês
+                [Op.lt]: new Date(ano, mes, 1), // data inicial do próximo mês
+            }
+        }
+    }).then((soma) => {
+        categoria.findByPk(categoriaId).then((categoria) => {
+            let disponivelCat = categoria.valor - soma
+
+            let erros = []
+
+            if (disponivelCat < req.body.valor) {
+                erros.push("O valor do gasto deve ser menor que o valor disponível da categoria")
+            }
+
+            if (!req.body.valor || req.body.valor == null || !req.body.descricao || req.body.descricao == null) {
+                erros.push("Preencha todos os campos")
+            }
+
+            if (erros.length > 0) {
+                res.send({ erros: erros })
+            } else {
+                //inserindo gasto
+                 gastoRealizado.create({
+                    descricao: req.body.descricao,
+                    valor: req.body.valor,
+                    categoriaId: req.body.categoriaId
+                }).then(() => {
+                    res.send(JSON.stringify("success"))
+                })
+            }
         })
-        res.send(JSON.stringify("success"))
+    })
+})
 
-    }
+router.post('/listarCat', async (req, res) => {
 
+    let usuarioId = req.body.usuarioId
+    let categoriaId = req.body.categoriaId
+
+    let mes = 4
+    let ano = 2023
+
+    await gastoRealizado.sum('gastosrealizados.valor', {
+        include: {
+            model: categoria,
+            where: { orcamentoId: usuarioId, id: categoriaId }
+        },
+        where: {
+            createdAt: {
+                [Op.gte]: new Date(ano, mes - 1, 1), // data inicial do mês
+                [Op.lt]: new Date(ano, mes, 1), // data inicial do próximo mês
+            }
+        }
+    }).then((response) => {
+        console.log(response)
+        res.send(JSON.stringify(response))
+    }).catch((error) => {
+        res.send(JSON.stringify(error))                    //<= tratamento de erro para evitar que a aplicação caia
+        console.log(error)
+    })
 })
 
 //rota com função de listar gastos através no mês de registro e da categoria vinculada ao usuário
@@ -80,8 +136,9 @@ router.get('/listar', async (req, res) => {
 
 // })
 
-router.post('/excluir', async (req, res) => {
-
+router.post('/excluir/:id', async (req, res) => {
+    await gastoRealizado.destroy({ where: { id: req.params.id } })
+    res.send(JSON.stringify('success'))
 })
 
 module.exports = router

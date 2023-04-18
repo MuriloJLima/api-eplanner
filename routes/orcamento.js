@@ -48,10 +48,11 @@ router.post('/adicionar', async (req, res) => {
 router.post('/listar', async (req, res) => {
 
     let id = req.body.usuarioId
-
-    await usuario.findByPk(id, { include: [{ all: true }] }).then((usuario) => {
+    
+    await usuario.findByPk(id, { include: {model: orcamento} }).then((usuario) => {
 
         let orcamento = usuario.orcamento
+        console.log(orcamento)
 
         // res.send(orcamento)
 
@@ -76,8 +77,8 @@ router.post('/listar', async (req, res) => {
             res.send(JSON.stringify(response))
             console.log(JSON.stringify(response))
         })
-    }).catch((error) => {                        //<= tratamento de erro para evitar que a aplicação caia
-        res.send(JSON.stringify('error'))
+    }).catch((error) => {   
+        res.send(JSON.stringify(error))                    //<= tratamento de erro para evitar que a aplicação caia
         console.log(error)
     })
 })
