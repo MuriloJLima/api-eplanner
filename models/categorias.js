@@ -20,7 +20,7 @@ const categorias = connection.define(
       type: Sequelize.STRING
     },
     valor: {
-      type: Sequelize.DECIMAL
+      type: Sequelize.DECIMAL(10, 2)
     },
     createdAt: {
       allowNull: false,

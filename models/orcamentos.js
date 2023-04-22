@@ -14,7 +14,7 @@ const orcamentos = connection.define(
       type: Sequelize.INTEGER
     },
     valor: {
-      type: Sequelize.DECIMAL
+      type: Sequelize.DECIMAL(10, 2)
     },
     createdAt: {
       allowNull: false,

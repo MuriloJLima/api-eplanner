@@ -110,7 +110,7 @@ router.post('/confirmarGasto/:id', async (req, res) => {
 //rota que exclui o agendamento do gasto
 router.post('/excluir/:id', async (req, res) => {
     await gastoAgendado.destroy({ where: { id: req.params.id } })
-    res.send('gasto deletado')
+    res.send('success')
 })
 
 module.exports = router
