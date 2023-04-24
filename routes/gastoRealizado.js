@@ -107,7 +107,7 @@ router.post('/listarCat', async (req, res) => {
 })
 
 //rota com função de listar gastos através no mês de registro e da categoria vinculada ao usuário
-router.get('/listar', async (req, res) => {
+router.post('/listar', async (req, res) => {
 
     let id = req.body.usuarioId
 
@@ -127,7 +127,8 @@ router.get('/listar', async (req, res) => {
         }
     }).then((response) => {
 
-        res.send(response)
+        res.send(JSON.stringify(response))
+        console.log(response)
     })
 })
 
@@ -136,7 +137,7 @@ router.get('/listar', async (req, res) => {
 
 // })
 
-router.post('/excluir/:id', async (req, res) => {
+router.get('/deletar/:id', async (req, res) => {
     await gastoRealizado.destroy({ where: { id: req.params.id } })
     res.send(JSON.stringify('success'))
 })

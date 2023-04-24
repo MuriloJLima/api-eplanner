@@ -48,8 +48,8 @@ router.post('/adicionar', async (req, res) => {
 router.post('/listar', async (req, res) => {
 
     let id = req.body.usuarioId
-    
-    await usuario.findByPk(id, { include: {model: orcamento} }).then((usuario) => {
+
+    await usuario.findByPk(id, { include: { model: orcamento } }).then((usuario) => {
 
         let orcamento = usuario.orcamento
         console.log(orcamento)
@@ -73,11 +73,11 @@ router.post('/listar', async (req, res) => {
                 }
             }
         }).then((gastos) => {
-            let response = {orcamento, gastos}
+            let response = { orcamento, gastos }
             res.send(JSON.stringify(response))
             console.log(JSON.stringify(response))
         })
-    }).catch((error) => {   
+    }).catch((error) => {
         res.send(JSON.stringify(error))                    //<= tratamento de erro para evitar que a aplicação caia
         console.log(error)
     })
@@ -87,6 +87,7 @@ router.post('/listar', async (req, res) => {
 router.get('/editar', async (req, res) => {
 
     let id = req.body.usuarioId
+
 
     await usuario.findByPk(id, { include: [{ all: true }] }).then((response) => {
         res.send(response.orcamentos)
@@ -103,15 +104,32 @@ router.post('/editar', async (req, res) => {
     let id = req.body.usuarioId
     let valor = req.body.valor
 
-    await orcamento.update(
-        { valor },
-        { where: { id } }
-    ).then(() => {
-        res.send(JSON.stringify('success'))
-    }).catch((error) => {
-        res.send(JSON.stringify('error'))
-        console.log(error)
+    categoria.sum('valor', { where: { orcamentoId: id } }).then((somaCats) => {
+
+        let erros = []
+
+        if (valor < somaCats) {
+            erros.push("o valor de suas categorias ultrapassa a renda selecionada!")
+        }
+
+        if (erros.length > 0) {
+            res.send({ erros: erros })
+        } else {
+
+            orcamento.update(
+                { valor },
+                { where: { id } }
+            ).then(() => {
+                res.send(JSON.stringify('success'))
+            }).catch((error) => {
+                res.send(JSON.stringify('error'))
+                console.log(error)
+            })
+        }
     })
+
+
+
 })
 
 //rota com função de deletar orçamento
