@@ -16,7 +16,8 @@ const router = express.Router()
 //importando models
 const categoria = require('../models/categorias')
 const orcamento = require('../models/orcamentos')
-const gastoRealizado = require('../models/gastosRealizados');
+const gastoRealizado = require('../models/gastosRealizados')
+const gastoAgendado = require('../models/gastosAgendados')
 
 //rota com função de listar renda disponível para criação de categoria
 router.post('/disponivelCat', async (req, res) => {
@@ -109,6 +110,17 @@ router.post('/listar', async (req, res) => {
                 }
             },
             required: false // permite incluir categorias sem gastos
+        },
+        {
+            model: gastoAgendado,
+            attributes: [],
+            where: {
+                dataGasto: {
+                    [Op.gte]: new Date(ano, mes - 1, 1),
+                    [Op.lt]: new Date(ano, mes, 1),
+                }
+            },
+            required: false // permite incluir categorias sem gastos
         }],
         attributes: [
             'id',
@@ -122,7 +134,14 @@ router.post('/listar', async (req, res) => {
             WHERE categoriaId = categorias.id
               AND MONTH(createdAt) = ${mes}
               AND YEAR(createdAt) = ${ano}
-          )`), 'valorTotalGastos']
+          )`), 'valorTotalGastos'],
+            [Sequelize.literal(`(
+            SELECT SUM(valor)
+            FROM gastosagendados
+            WHERE categoriaId = categorias.id
+              AND MONTH(dataGasto) = ${mes}
+              AND YEAR(dataGasto) = ${ano}
+          )`), 'gastosAgendados']
         ]
     }).then((response) => {
         console.log(response);

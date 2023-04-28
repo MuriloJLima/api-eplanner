@@ -17,7 +17,8 @@ const router = express.Router()
 const usuario = require('../models/usuarios')
 const orcamento = require('../models/orcamentos')
 const gastoRealizado = require('../models/gastosRealizados')
-const categoria = require('../models/categorias')
+const gastoAgendado = require('../models/gastosAgendados')
+const categoria = require('../models/categorias');
 
 //rota com função de adicionar orçamento
 router.post('/adicionar', async (req, res) => {
@@ -72,15 +73,32 @@ router.post('/listar', async (req, res) => {
                     [Op.lt]: new Date(ano, mes, 1), // data inicial do próximo mês
                 }
             }
-        }).then((gastos) => {
-            let response = { orcamento, gastos }
-            res.send(JSON.stringify(response))
-            console.log(JSON.stringify(response))
+        }).then((gastosRealizados) => {
+
+            gastoAgendado.sum('gastosagendados.valor', {
+                include: {
+                    model: categoria,
+                    where: { orcamentoId: id }
+                },
+                where: {
+                    dataGasto: {
+                        [Op.gte]: new Date(ano, mes - 1, 1), // data inicial do mês
+                        [Op.lt]: new Date(ano, mes, 1), // data inicial do próximo mês
+                    }
+                }
+            }).then((gastosAgendados) => {
+
+                    let gastos = gastosRealizados + gastosAgendados
+                    let response = { orcamento, gastos }
+                    res.send(JSON.stringify(response))
+                    console.log(JSON.stringify(response))
+                }).catch((error) => {
+                    res.send(JSON.stringify(error))                    //<= tratamento de erro para evitar que a aplicação caia
+                    console.log(error)
+                })
         })
-    }).catch((error) => {
-        res.send(JSON.stringify(error))                    //<= tratamento de erro para evitar que a aplicação caia
-        console.log(error)
     })
+
 })
 
 //rota com função de listar orçamento a ser editado
