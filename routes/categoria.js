@@ -99,6 +99,7 @@ router.post('/listar', async (req, res) => {
     const ano = req.body.ano;
 
     await categoria.findAll({
+        order:[['id', 'DESC']],
         where: { orcamentoId: usuarioId },
         include: [{
             model: gastoRealizado,

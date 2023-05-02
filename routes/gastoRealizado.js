@@ -115,6 +115,7 @@ router.post('/listar', async (req, res) => {
     let ano = req.body.ano
 
     await gastoRealizado.findAll({
+        order:[['id', 'DESC']],
         include: {
             model: categoria,
             where: { orcamentoId: id }
