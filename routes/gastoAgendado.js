@@ -54,7 +54,7 @@ router.post('/adicionar', async (req, res) => {
                 res.send({ erros: erros })
             } else {
                 //inserindo gasto
-                gastoRealizado.create({
+                gastoAgendado.create({
                     descricao: req.body.descricao,
                     valor: req.body.valor,
                     dataGasto: req.body.dataGasto,
@@ -68,7 +68,7 @@ router.post('/adicionar', async (req, res) => {
 })
 
 //rota com função de listar gasto agendado
-router.get('/listar', async (req, res) => {
+router.post('/listar', async (req, res) => {
 
     let id = req.body.usuarioId
 
@@ -100,7 +100,7 @@ router.post('/confirmarGasto/:id', async (req, res) => {
             // deleta o gasto agendado
             await gastoAgendadoEncontrado.destroy();
         }
-        res.send('success');
+        res.send(JSON.stringify("success"))
     } catch (error) {
         console.error(error);
         res.send('error');

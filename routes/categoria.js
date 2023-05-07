@@ -142,7 +142,7 @@ router.post('/listar', async (req, res) => {
             WHERE categoriaId = categorias.id
               AND MONTH(dataGasto) = ${mes}
               AND YEAR(dataGasto) = ${ano}
-          )`), 'gastosAgendados']
+          )`), 'valorTotalGastosAgendados']
         ]
     }).then((response) => {
         console.log(response);
