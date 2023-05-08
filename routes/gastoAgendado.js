@@ -103,7 +103,7 @@ router.post('/confirmarGasto/:id', async (req, res) => {
         res.send(JSON.stringify("success"))
     } catch (error) {
         console.error(error);
-        res.send('error');
+        res.send(JSON.stringify('error'));
     }
 });
 
