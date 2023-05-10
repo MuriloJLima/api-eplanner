@@ -73,6 +73,7 @@ router.post('/listar', async (req, res) => {
     let id = req.body.usuarioId
 
     await gastoAgendado.findAll({
+        order:[['dataGasto']],
         include: {
             model: categoria,
             where: { orcamentoId: id }
@@ -103,7 +104,7 @@ router.post('/confirmarGasto/:id', async (req, res) => {
         res.send(JSON.stringify("success"))
     } catch (error) {
         console.error(error);
-        res.send('error');
+        res.send(JSON.stringify('error'));
     }
 });
 
