@@ -67,9 +67,8 @@ router.post('/adicionar', async (req, res) => {
             erros.push("O valor da categoria deve ser menor que o valor disponível")
         }
 
-        if (!req.body.valor || req.body.valor == null || !req.body.nome || req.body.nome == null
-            || !req.body.descricao || req.body.descricao == null) {
-            erros.push("Preencha todos os campos")
+        if (!req.body.valor || req.body.valor == null || !req.body.nome || req.body.nome == null) {
+            erros.push("Preencha os campos obrigatórios")
         }
 
         if (erros.length > 0) {
