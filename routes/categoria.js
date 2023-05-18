@@ -217,71 +217,78 @@ router.post('/gastosMeses', async (req, res) => {
     const mes = req.body.mes;
     const ano = req.body.ano;
 
-    await categoria.findByPk(id, {
-        include: [{
-            model: gastoRealizado,
-            attributes: [],
-            where: {
-                createdAt: {
-                    [Op.gte]: new Date(ano, mes - 1, 1),
-                    [Op.lt]: new Date(ano, mes, 1),
-                }
-            },
-            required: false // permite incluir categorias sem gastos
-        }],
-        attributes: [
-            'id',
-            'nome',
-            'valor',
-            'descricao',
-            'orcamentoId',
-            [Sequelize.literal(`(
-              SELECT SUM(valor)
-              FROM gastosrealizados
-              WHERE categoriaId = categorias.id
-                AND MONTH(createdAt) = ${mes - 5}
-                AND YEAR(createdAt) = ${ano}
-            ) `), 'mes6'],
-            [Sequelize.literal(`(
-              SELECT SUM(valor)
-              FROM gastosrealizados
-              WHERE categoriaId = categorias.id
-                AND MONTH(createdAt) = ${mes - 4}
-                AND YEAR(createdAt) = ${ano}
-            ) `), 'mes5'],
-            [Sequelize.literal(`(
-              SELECT SUM(valor)
-              FROM gastosrealizados
-              WHERE categoriaId = categorias.id
-                AND MONTH(createdAt) = ${mes - 3}
-                AND YEAR(createdAt) = ${ano}
-            ) `), 'mes4'],
-            [Sequelize.literal(`(
-              SELECT SUM(valor)
-              FROM gastosrealizados
-              WHERE categoriaId = categorias.id
-                AND MONTH(createdAt) = ${mes - 2}
-                AND YEAR(createdAt) = ${ano}
-            ) `), 'mes3'],
-            [Sequelize.literal(`(
-              SELECT SUM(valor)
-              FROM gastosrealizados
-              WHERE categoriaId = categorias.id
-                AND MONTH(createdAt) = ${mes - 1}
-                AND YEAR(createdAt) = ${ano}
-            ) `), 'mes2'],
-            [Sequelize.literal(`(
-              SELECT SUM(valor)
-              FROM gastosrealizados
-              WHERE categoriaId = categorias.id
-                AND MONTH(createdAt) = ${mes}
-                AND YEAR(createdAt) = ${ano}
-            ) `), 'mes1']
-        ]
-    }).then((response) => {
+    if (id == ''){
+        let response = ['error']
+        res.send(response)
         console.log(response);
-        res.send(response);
-    });
+    } else{
+        await categoria.findByPk(id, {
+            include: [{
+                model: gastoRealizado,
+                attributes: [],
+                where: {
+                    createdAt: {
+                        [Op.gte]: new Date(ano, mes - 1, 1),
+                        [Op.lt]: new Date(ano, mes, 1),
+                    }
+                },
+                required: false // permite incluir categorias sem gastos
+            }],
+            attributes: [
+                'id',
+                'nome',
+                'valor',
+                'descricao',
+                'orcamentoId',
+                [Sequelize.literal(`(
+                  SELECT SUM(valor)
+                  FROM gastosrealizados
+                  WHERE categoriaId = categorias.id
+                    AND MONTH(createdAt) = ${mes - 5}
+                    AND YEAR(createdAt) = ${ano}
+                ) `), 'mes6'],
+                [Sequelize.literal(`(
+                  SELECT SUM(valor)
+                  FROM gastosrealizados
+                  WHERE categoriaId = categorias.id
+                    AND MONTH(createdAt) = ${mes - 4}
+                    AND YEAR(createdAt) = ${ano}
+                ) `), 'mes5'],
+                [Sequelize.literal(`(
+                  SELECT SUM(valor)
+                  FROM gastosrealizados
+                  WHERE categoriaId = categorias.id
+                    AND MONTH(createdAt) = ${mes - 3}
+                    AND YEAR(createdAt) = ${ano}
+                ) `), 'mes4'],
+                [Sequelize.literal(`(
+                  SELECT SUM(valor)
+                  FROM gastosrealizados
+                  WHERE categoriaId = categorias.id
+                    AND MONTH(createdAt) = ${mes - 2}
+                    AND YEAR(createdAt) = ${ano}
+                ) `), 'mes3'],
+                [Sequelize.literal(`(
+                  SELECT SUM(valor)
+                  FROM gastosrealizados
+                  WHERE categoriaId = categorias.id
+                    AND MONTH(createdAt) = ${mes - 1}
+                    AND YEAR(createdAt) = ${ano}
+                ) `), 'mes2'],
+                [Sequelize.literal(`(
+                  SELECT SUM(valor)
+                  FROM gastosrealizados
+                  WHERE categoriaId = categorias.id
+                    AND MONTH(createdAt) = ${mes}
+                    AND YEAR(createdAt) = ${ano}
+                ) `), 'mes1']
+            ]
+        }).then((response) => {
+            console.log(response);
+            res.send(response);
+        });
+    }
+
 });
 
 //função que lista a soma dos gastos de dois meses selecionados pelo usuário, 
