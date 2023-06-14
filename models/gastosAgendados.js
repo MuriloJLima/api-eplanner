@@ -1,9 +1,11 @@
+// Importações
 const Sequelize = require('sequelize');
 
 const connection = require('../database/database');
 
 const categorias = require('./categorias')
 
+// Model de gastos realizados
 const gastosAgendados = connection.define(
   'gastosAgendados',
   {
@@ -34,13 +36,16 @@ const gastosAgendados = connection.define(
   }
 )
 
+// Configurações de relacionamento
 categorias.hasMany(gastosAgendados, {
   foreignKey: 'categoriaId',
-  onUpdate:'cascade',
-  onDelete:'cascade'
+  onUpdate: 'cascade',
+  onDelete: 'cascade'
 })
 
-gastosAgendados.belongsTo(categorias, { foreignKey: 'categoriaId' });
+gastosAgendados.belongsTo(categorias, {
+  foreignKey: 'categoriaId'
+});
 
 
 //gastosAgendados.sync()

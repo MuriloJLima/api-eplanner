@@ -1,9 +1,10 @@
 //importando express
 const express = require('express');
+
 //importando cors
 const cors = require('cors');
 
-//importando rotas
+//importando rotas externas
 const routerUsuario = require('./routes/usuario')
 const routerOrcamento = require('./routes/orcamento')
 const routerCategoria = require('./routes/categoria')
@@ -16,9 +17,6 @@ app.use(cors());
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
-// app.get('/', (req, res)=>{
-//     res.send('Servidor rodando')
-// })
 
 //colocando rotas em uso 
 app.use('/usuario', routerUsuario)
@@ -29,6 +27,7 @@ app.use('/gastoAgendado', routerGastoAgendado)
 
 //porta
 let porta = process.env.PORT || 3000;
+
 app.listen(porta, (req, res)=>{
     console.log('Servidor rodando');
 });

@@ -1,9 +1,11 @@
+// Importações
 const Sequelize = require('sequelize');
 
 const connection = require('../database/database');
 
 const usuarios = require('./usuarios')
 
+// Model de orçamento
 const orcamentos = connection.define(
   'orcamentos',
   {
@@ -27,6 +29,7 @@ const orcamentos = connection.define(
   }
 )
 
+// Configurações de relacionamento
 orcamentos.belongsTo(usuarios, {
   foreignKey: 'usuarioId',
   onUpdate:'cascade',

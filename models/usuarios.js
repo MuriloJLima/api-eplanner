@@ -1,7 +1,9 @@
+// Importações
 const Sequelize = require('sequelize');
 
 const connection = require('../database/database');
 
+// Model de usuários
 const usuarios = connection.define(
   'usuarios',
   {

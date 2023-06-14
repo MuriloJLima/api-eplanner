@@ -11,6 +11,7 @@ const usuario = require('../models/usuarios')
 router.post('/adicionar', async (req, res) => {
 
     try {
+        //validação
         let erros = []
 
         if (!req.body.nome || req.body.nome == null) {
@@ -20,7 +21,7 @@ router.post('/adicionar', async (req, res) => {
         if (erros.length > 0) {
             res.send({ erros: erros })
         } else {
-            let response = await usuario.create({
+            let response = await usuario.create({ //criando registro no banco de dados
                 nome: req.body.nome,
                 email: req.body.email,
                 senha: req.body.senha
@@ -33,18 +34,18 @@ router.post('/adicionar', async (req, res) => {
     }
 })
 
-//rota com função de validar usuário
+//rota com função de validar usuário (login)
 router.post('/login', async (req, res) => {
     await usuario.findOne({
-        where: { email: req.body.email, senha: req.body.senha }
+        where: { email: req.body.email, senha: req.body.senha } //verificando dados
     }).then((response) => {
         if (response === null) {
-            res.send(JSON.stringify('error'))
+            res.send(JSON.stringify('error')) //caso não ache os dados 
         } else {
-            res.send(response)
+            res.send(response) //cado ache os dados
         }
     }).catch((error) => {
-        res.send(JSON.stringify('error'))  //<= tratamento de erro para evitar que a aplicação caia
+        res.send(JSON.stringify('error'))  //tratamento de erro para evitar que a aplicação caia
         console.log(error)
     })
 })
