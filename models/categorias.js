@@ -1,9 +1,11 @@
+// Importações
 const Sequelize = require('sequelize');
 
 const connection = require('../database/database');
 
 const orcamentos = require('./orcamentos')
 
+// Model de categorias
 const categorias = connection.define(
   'categorias',
   {
@@ -33,6 +35,7 @@ const categorias = connection.define(
   }
 )
 
+// Configurações de relacionamento
 orcamentos.hasMany(categorias, {
   foreignKey: 'orcamentoId',
   onUpdate:'cascade',

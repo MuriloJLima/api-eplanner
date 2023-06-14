@@ -7,6 +7,7 @@ const app = express()
 //configurando express para trabalhar com json
 app.use(express.json());
 
+//importações do sequelize para requisições adicionais
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
@@ -19,36 +20,42 @@ const orcamento = require('../models/orcamentos')
 const gastoRealizado = require('../models/gastosRealizados')
 const gastoAgendado = require('../models/gastosAgendados')
 
-//rota com função de listar renda disponível para criação de categoria
+//rota com função de listar orçamento disponível para criação de categoria
 router.post('/disponivelCat', async (req, res) => {
     try {
-        let usuarioId = req.body.usuarioId
-
-
+        let usuarioId = req.body.usuarioId;
+    
+        //seleciona o orçamento
         await orcamento.findOne({ where: { usuarioId } }).then((renda) => {
-
+    
+            //procura todas as categorias que pertencem ao orçamento selecionado
             categoria.findAll({ where: { orcamentoId: renda.id } }).then((categorias) => {
+    
+                //verifica se não existem categorias encontradas 
                 if (categorias == '' || !categorias) {
-                    let response = renda.valor
 
-                    res.send(JSON.stringify(response))
-                    console.log(response)
+                    //envia somente o valor da renda
+                    let response = renda.valor;
+                    res.send(JSON.stringify(response));
+                    console.log(response);
                 }
                 else {
+                    //soma todos os valores da categoria
                     categoria.sum('valor', { where: { orcamentoId: renda.id } }).then((somaCats) => {
-                        let response = renda.valor - somaCats
 
-                        console.log(response)
-                        res.send(JSON.stringify(response))
-                    })
+                        //envia para o front o orçamento - a soma das categorias
+                        let response = renda.valor - somaCats;
 
+                        console.log(response);
+                        res.send(JSON.stringify(response));
+                    });
                 }
-
-            })
-        })
+            });
+        });
     } catch {
-        res.send(JSON.stringify('error'))
+        res.send(JSON.stringify('error'));
     }
+    
 })
 
 
@@ -92,64 +99,72 @@ router.post('/adicionar', async (req, res) => {
 //juntamente com o total de gastos naquele mês
 router.post('/listar', async (req, res) => {
 
+    //recebe os valores do usuárioId, mês e ano do corpo da requisição
     const usuarioId = req.body.usuarioId;
-
     const mes = req.body.mes;
     const ano = req.body.ano;
 
+    //procura todas as categorias com base nos critérios definidos
     await categoria.findAll({
         order:[['id', 'DESC']],
-        where: { orcamentoId: usuarioId },
-        include: [{
-            model: gastoRealizado,
-            attributes: [],
-            where: {
-                createdAt: {
-                    [Op.gte]: new Date(ano, mes - 1, 1),
-                    [Op.lt]: new Date(ano, mes, 1),
-                }
+        where: { orcamentoId: usuarioId }, // Filtra pelo orcamentoId igual ao usuárioId
+
+        //filtra somente os gastos do mês
+        include: [
+            {
+                model: gastoRealizado,
+                attributes: [],
+                where: {
+                    createdAt: {
+                        [Op.gte]: new Date(ano, mes - 1, 1),
+                        [Op.lt]: new Date(ano, mes, 1),
+                    }
+                },
+                required: false // Permite incluir categorias sem gastos realizados
             },
-            required: false // permite incluir categorias sem gastos
-        },
-        {
-            model: gastoAgendado,
-            attributes: [],
-            where: {
-                dataGasto: {
-                    [Op.gte]: new Date(ano, mes - 1, 1),
-                    [Op.lt]: new Date(ano, mes, 1),
-                }
-            },
-            required: false // permite incluir categorias sem gastos
-        }],
+            //filtra somente os gastos do mês
+            {
+                model: gastoAgendado,
+                attributes: [],
+                where: {
+                    dataGasto: {
+                        [Op.gte]: new Date(ano, mes - 1, 1),
+                        [Op.lt]: new Date(ano, mes, 1),
+                    }
+                },
+                required: false
+            }
+        ],
         attributes: [
             'id',
             'nome',
             'valor',
             'descricao',
             'orcamentoId',
+            //subconsulta para obter o valor total de gastos realizados para cada categoria no mês e ano fornecidos
             [Sequelize.literal(`(
-            SELECT SUM(valor)
-            FROM gastosrealizados
-            WHERE categoriaId = categorias.id
-              AND MONTH(createdAt) = ${mes}
-              AND YEAR(createdAt) = ${ano}
-          )`), 'valorTotalGastos'],
+                SELECT SUM(valor)
+                FROM gastosrealizados
+                WHERE categoriaId = categorias.id
+                  AND MONTH(createdAt) = ${mes}
+                  AND YEAR(createdAt) = ${ano}
+            )`), 'valorTotalGastos'],
+            //subconsulta para obter o valor total de gastos agendados para cada categoria no mês e ano fornecidos
             [Sequelize.literal(`(
-            SELECT SUM(valor)
-            FROM gastosagendados
-            WHERE categoriaId = categorias.id
-              AND MONTH(dataGasto) = ${mes}
-              AND YEAR(dataGasto) = ${ano}
-          )`), 'valorTotalGastosAgendados']
+                SELECT SUM(valor)
+                FROM gastosagendados
+                WHERE categoriaId = categorias.id
+                  AND MONTH(dataGasto) = ${mes}
+                  AND YEAR(dataGasto) = ${ano}
+            )`), 'valorTotalGastosAgendados']
         ]
     }).then((response) => {
         console.log(response);
         res.send(response);
-    })
-})
+    });
+});
 
-//rota com função de listar dados da categoria no form de edição
+//rota com função de listar dados da categoria no formulário de edição
 router.get('/editar/:id', async (req, res) => {
     try {
         let response = await categoria.findByPk(req.params.id)
@@ -208,7 +223,7 @@ router.get('/deletar/:id', async (req, res) => {
 
 })
 
-//rota com função de listar a soma dos gastos dos últimos 6 meses indidualmente, 
+//rota com função de listar a soma dos gastos dos últimos 6 meses individualmente, 
 //os quais pertencem a uma categoria
 router.post('/gastosMeses', async (req, res) => {
 
@@ -216,11 +231,13 @@ router.post('/gastosMeses', async (req, res) => {
     const mes = req.body.mes;
     const ano = req.body.ano;
 
+    // Verifica se o id está vazio (caso o usuário não selecione uma categoria)
     if (id == ''){
         let response = ['error']
         res.send(response)
-        console.log(response);
     } else{
+        
+        //procura a categoria selecionada juntamente com todos os seus gastos realizados
         await categoria.findByPk(id, {
             include: [{
                 model: gastoRealizado,
@@ -233,6 +250,8 @@ router.post('/gastosMeses', async (req, res) => {
                 },
                 required: false // permite incluir categorias sem gastos
             }],
+            //subconsulta para obter o valor total de gastos realizados 
+            //para a categoria nos últimos 6 meses, e os separando em um campo específico no objeto
             attributes: [
                 'id',
                 'nome',
@@ -290,7 +309,7 @@ router.post('/gastosMeses', async (req, res) => {
 
 });
 
-//função que lista a soma dos gastos de dois meses selecionados pelo usuário, 
+//função que seleciona a soma dos gastos de dois meses selecionados pelo usuário, 
 //os quais pertencem a uma categoria
 router.post('/gastosComparar', async (req, res) => {
 
@@ -302,14 +321,15 @@ router.post('/gastosComparar', async (req, res) => {
     const mes2 = req.body.mes2;
     const ano2 = req.body.ano2;
 
-    console.log(mes1, ano1, mes2, ano2)
+    // console.log(mes1, ano1, mes2, ano2)
 
+    // Verifica se o id está vazio (caso o usuário não selecione uma categoria)
     if (id == ''){
         let response = ['error']
         res.send(response)
-        console.log(response);
     } else{
 
+        // Procura a categoria com base no id fornecido e realiza duas consultas para as duas comparações
         await categoria.findByPk(id, {
             include: [
                 {
@@ -332,7 +352,7 @@ router.post('/gastosComparar', async (req, res) => {
                             [Op.lt]: new Date(ano2, mes2, 1),
                         }
                     },
-                    required: false // permite incluir categorias sem gastos
+                    required: false
                 }
             ],
             attributes: [
@@ -341,6 +361,7 @@ router.post('/gastosComparar', async (req, res) => {
                 'valor',
                 'descricao',
                 'orcamentoId',
+                //subconsulta para obter o valor total de gastos realizados para a categoria no primeiro mês
                 [Sequelize.literal(`(
                 SELECT SUM(valor)
                 FROM gastosrealizados
@@ -348,6 +369,7 @@ router.post('/gastosComparar', async (req, res) => {
                   AND MONTH(createdAt) = ${mes1}
                   AND YEAR(createdAt) = ${ano1}
               )`), 'valorTotalGastos1'],
+              //subconsulta para obter o valor total de gastos realizados para a categoria no segundo mês
                 [Sequelize.literal(`(
                 SELECT SUM(valor)
                 FROM gastosrealizados

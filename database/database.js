@@ -1,5 +1,7 @@
+// Importações
 const Sequelize = require('sequelize');
 
+// Configurações da conexão com banco de dados
 const connection = new Sequelize(
     'eplanner', 
     'root',
